@@ -1,0 +1,19 @@
+{
+  "status": "prototype",
+  "scenario": "synthetic",
+  "commercialUse": "none",
+  "businessInvolvement": "none",
+  "provenance": [
+    "Independently written requirements",
+    "Original employer-agnostic example skills",
+    "Synthetic validation fixtures"
+  ],
+  "evidence": [
+    "Three installable example skills",
+    "Validation command",
+    "Safe dry-run synchronization command",
+    "Automated parser and validation tests",
+    "Documented demo"
+  ],
+  "disclosure": "Self-directed concept build using fictional, synthetic, or public information. Not commissioned by or used by a business."
+}
