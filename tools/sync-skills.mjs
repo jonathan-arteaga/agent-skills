@@ -12,11 +12,30 @@ const repoRoot = path.resolve(
 );
 const skillsRoot = path.join(repoRoot, ".agents", "skills");
 const targetRoots = {
-  codex: path.join(os.homedir(), ".agents", "skills"),
-  claude: path.join(os.homedir(), ".claude", "skills"),
-  cursor: path.join(os.homedir(), ".cursor", "skills"),
-  copilot: path.join(os.homedir(), ".copilot", "skills"),
+  codex: [path.join(os.homedir(), ".agents", "skills")],
+  portable: [path.join(os.homedir(), ".agents", "skills")],
+  claude: [path.join(os.homedir(), ".claude", "skills")],
+  cursor: [path.join(os.homedir(), ".cursor", "skills")],
+  copilot: [path.join(os.homedir(), ".copilot", "skills")],
+  all: [
+    path.join(os.homedir(), ".agents", "skills"),
+    path.join(os.homedir(), ".claude", "skills"),
+    path.join(os.homedir(), ".cursor", "skills"),
+    path.join(os.homedir(), ".copilot", "skills"),
+  ],
 };
+
+function usage() {
+  console.log(`Usage: node tools/sync-skills.mjs [options]
+
+Options:
+  --target <name>  codex, portable, claude, cursor, copilot, or all
+  --skill <name>   Sync one skill; repeat to select more than one
+  --apply          Write changes; without it, the command is a dry run
+  --force          Replace existing destination folders
+  --help           Show this help
+`);
+}
 
 function parseArgs(argv) {
   const options = {
@@ -28,7 +47,9 @@ function parseArgs(argv) {
 
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
-    if (argument === "--target") {
+    if (argument === "--help" || argument === "-h") {
+      options.help = true;
+    } else if (argument === "--target") {
       options.target = argv[++index];
     } else if (argument === "--skill") {
       options.selected.push(argv[++index]);
@@ -43,6 +64,7 @@ function parseArgs(argv) {
     }
   }
 
+  if (options.help) return options;
   if (!options.target || !(options.target in targetRoots)) {
     throw new Error(`Unsupported target: ${options.target}`);
   }
@@ -59,6 +81,11 @@ try {
 } catch (error) {
   console.error(error instanceof Error ? error.message : String(error));
   process.exit(1);
+}
+
+if (options.help) {
+  usage();
+  process.exit(0);
 }
 
 const issues = validateSkills(skillsRoot);
@@ -80,35 +107,37 @@ if (missing.length > 0) {
   process.exit(1);
 }
 
-const destinationRoot = targetRoots[options.target];
+const destinationRoots = [...new Set(targetRoots[options.target])];
 console.log(`Mode: ${options.apply ? "apply" : "dry-run"}`);
 console.log(`Target: ${options.target}`);
 
-if (options.apply) fs.mkdirSync(destinationRoot, { recursive: true });
+for (const destinationRoot of destinationRoots) {
+  if (options.apply) fs.mkdirSync(destinationRoot, { recursive: true });
 
-for (const skill of selected) {
-  const destination = path.join(destinationRoot, skill.name);
-  const exists = fs.existsSync(destination);
+  for (const skill of selected) {
+    const destination = path.join(destinationRoot, skill.name);
+    const exists = fs.existsSync(destination);
 
-  if (!options.apply) {
-    const action = exists
-      ? options.force
-        ? "would replace"
-        : "would skip"
-      : "would copy";
-    console.log(`${action}: ${skill.name} -> ${destination}`);
-    continue;
+    if (!options.apply) {
+      const action = exists
+        ? options.force
+          ? "would replace"
+          : "would skip"
+        : "would copy";
+      console.log(`${action}: ${skill.name} -> ${destination}`);
+      continue;
+    }
+
+    if (exists && !options.force) {
+      console.log(`skipped: ${skill.name} -> ${destination}`);
+      continue;
+    }
+    if (exists) fs.rmSync(destination, { recursive: true, force: true });
+    fs.cpSync(skill.directory, destination, {
+      recursive: true,
+      force: false,
+      errorOnExist: true,
+    });
+    console.log(`copied: ${skill.name} -> ${destination}`);
   }
-
-  if (exists && !options.force) {
-    console.log(`skipped: ${skill.name} -> ${destination}`);
-    continue;
-  }
-  if (exists) fs.rmSync(destination, { recursive: true, force: true });
-  fs.cpSync(skill.directory, destination, {
-    recursive: true,
-    force: false,
-    errorOnExist: true,
-  });
-  console.log(`copied: ${skill.name} -> ${destination}`);
 }

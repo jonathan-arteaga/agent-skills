@@ -1,12 +1,24 @@
 ---
 name: example-skill
-description: Use when this focused example workflow is needed.
+description: Perform a focused reusable workflow. Use when a request needs the specific outcome, inputs, or tools this skill covers.
 ---
 
 # Example skill
 
-1. Identify the bounded input.
-2. Follow the project constraints.
-3. Produce the named artifact.
-4. Run the narrowest useful check.
-5. Report the result and any limitation.
+## Workflow
+
+1. Read the task and identify the bounded inputs.
+2. Follow repository and tool-specific constraints.
+3. Read only the bundled references relevant to the request.
+4. Produce the requested outcome.
+5. Run the narrowest useful verification.
+
+## Resources
+
+- Put detailed guidance in `references/`.
+- Add `scripts/` only for deterministic work that would otherwise be rewritten.
+- Add `assets/` only for files copied or used in the output.
+
+## Report
+
+Lead with the result. State what changed, how it was verified, and what remains.

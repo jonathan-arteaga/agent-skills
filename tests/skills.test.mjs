@@ -6,6 +6,7 @@ import test from "node:test";
 import {
   discoverSkills,
   parseFrontmatter,
+  validateOpenAiMetadata,
   validateSkillContent,
   validateSkills,
 } from "../tools/lib/skills.mjs";
@@ -44,7 +45,21 @@ TODO: write this.
   ]);
 });
 
-test("repository examples are discoverable and valid", () => {
+test("OpenAI metadata requires an exact skill invocation", () => {
+  assert.deepEqual(
+    validateOpenAiMetadata(
+      `interface:
+  display_name: "Sample Skill"
+  short_description: "Run the sample workflow reliably"
+  default_prompt: "Use this skill for the task."
+`,
+      "sample-skill",
+    ),
+    ["interface.default_prompt must include $sample-skill"],
+  );
+});
+
+test("repository skills are discoverable and valid", () => {
   const root = path.resolve(".agents", "skills");
   const skills = discoverSkills(root);
 
@@ -52,6 +67,7 @@ test("repository examples are discoverable and valid", () => {
     skills.map((skill) => skill.name),
     [
       "frame-concept-build",
+      "review-apple-platform-app",
       "validate-project-claims",
       "write-reproducible-demo",
     ],

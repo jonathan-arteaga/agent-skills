@@ -1,0 +1,4 @@
+interface:
+  display_name: "Review Apple Platform App"
+  short_description: "Audit and improve Apple platform apps"
+  default_prompt: "Use $review-apple-platform-app to audit and improve this iOS or macOS project."
