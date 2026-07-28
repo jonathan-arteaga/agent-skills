@@ -67,6 +67,39 @@ export function validateSkillContent(content, folderName) {
   return errors;
 }
 
+export function validateOpenAiMetadata(content, skillName) {
+  const errors = [];
+  const displayName = content.match(/^\s*display_name:\s*"([^"]+)"\s*$/m)?.[1];
+  const shortDescription = content.match(
+    /^\s*short_description:\s*"([^"]+)"\s*$/m,
+  )?.[1];
+  const defaultPrompt = content.match(
+    /^\s*default_prompt:\s*"([^"]+)"\s*$/m,
+  )?.[1];
+
+  if (!/^interface:\s*$/m.test(content)) {
+    errors.push("missing interface block");
+  }
+  if (!displayName) {
+    errors.push("missing quoted interface.display_name");
+  }
+  if (!shortDescription) {
+    errors.push("missing quoted interface.short_description");
+  } else if (
+    shortDescription.length < 25 ||
+    shortDescription.length > 64
+  ) {
+    errors.push("interface.short_description must be 25-64 characters");
+  }
+  if (!defaultPrompt) {
+    errors.push("missing quoted interface.default_prompt");
+  } else if (!defaultPrompt.includes(`$${skillName}`)) {
+    errors.push(`interface.default_prompt must include $${skillName}`);
+  }
+
+  return errors;
+}
+
 export function discoverSkills(skillsRoot) {
   if (!fs.existsSync(skillsRoot)) return [];
 
@@ -88,10 +121,23 @@ export function discoverSkills(skillsRoot) {
 export function validateSkills(skillsRoot) {
   return discoverSkills(skillsRoot).flatMap((skill) => {
     const content = fs.readFileSync(skill.file, "utf8");
-    return validateSkillContent(content, skill.name).map((message) => ({
+    const skillIssues = validateSkillContent(content, skill.name).map((message) => ({
       skill: skill.name,
       file: skill.file,
       message,
     }));
+    const metadataFile = path.join(skill.directory, "agents", "openai.yaml");
+    const metadataIssues = fs.existsSync(metadataFile)
+      ? validateOpenAiMetadata(
+          fs.readFileSync(metadataFile, "utf8"),
+          skill.name,
+        ).map((message) => ({
+          skill: skill.name,
+          file: metadataFile,
+          message,
+        }))
+      : [];
+
+    return [...skillIssues, ...metadataIssues];
   });
 }

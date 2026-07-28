@@ -1,10 +1,11 @@
 # Tool compatibility
 
-The examples use the portable `SKILL.md` shape:
+The canonical skills use the portable `SKILL.md` shape:
 
 ```text
 skill-name/
 ├── SKILL.md
+├── agents/
 ├── references/
 ├── scripts/
 └── assets/
@@ -19,14 +20,24 @@ description: What the skill does and when to use it.
 ---
 ```
 
-The dry-run command maps the same canonical folder to these user-level roots:
+`SKILL.md` remains the source of truth. Optional metadata such as
+`agents/openai.yaml` may improve a specific tool's interface without replacing
+the portable instructions.
+
+The synchronization command maps the same canonical folder to these user-level
+roots:
 
 | target | destination |
 | --- | --- |
 | codex | `~/.agents/skills` |
+| portable | `~/.agents/skills` |
 | claude | `~/.claude/skills` |
 | cursor | `~/.cursor/skills` |
 | copilot | `~/.copilot/skills` |
+| all | All four distinct roots above |
 
 Tool-specific metadata can sit beside a portable skill when it adds value, but
-the default examples deliberately avoid it.
+tool-specific instructions should not be added to the portable frontmatter.
+
+Always preview with `--dry-run`. Applying a sync skips existing destination
+folders unless `--force` is supplied.

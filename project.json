@@ -1,19 +1,25 @@
 {
-  "status": "prototype",
-  "scenario": "synthetic",
-  "commercialUse": "none",
-  "businessInvolvement": "none",
+  "status": "active",
+  "purpose": [
+    "Share original reusable agent skills for others to inspect, adapt, and use",
+    "Keep a versioned backup of Jonathan's best personal agent skills"
+  ],
+  "sourceOfTruth": ".agents/skills",
   "provenance": [
-    "Independently written requirements",
-    "Original employer-agnostic example skills",
+    "Original skills authored for personal and public use",
+    "Generic Apple-platform review material migrated from Jonathan's private prompt archive",
     "Synthetic validation fixtures"
   ],
-  "evidence": [
-    "Three installable example skills",
-    "Validation command",
-    "Safe dry-run synchronization command",
-    "Automated parser and validation tests",
-    "Documented demo"
+  "exclusions": [
+    "Employer or customer material",
+    "Credentials or private operational data",
+    "Copied system-managed, plugin-provided, or third-party installed skills"
   ],
-  "disclosure": "Self-directed concept build using fictional, synthetic, or public information. Not commissioned by or used by a business."
+  "evidence": [
+    "Portable installable skills",
+    "Dry-run-first synchronization command",
+    "Automated parser and validation tests",
+    "Documented compatibility and backup workflow",
+    "MIT license for reuse and adaptation"
+  ]
 }
